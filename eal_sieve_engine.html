@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EAL Sieve-Logic Validation Engine · Strand 3: Grammar</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --surface: #13161b;
+    --surface2: #1a1e25;
+    --surface3: #21262f;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #8b909c;
+    --text3: #555b68;
+    --pass: #22c97a;
+    --pass-bg: rgba(34,201,122,0.08);
+    --pass-border: rgba(34,201,122,0.25);
+    --fail: #f05454;
+    --fail-bg: rgba(240,84,84,0.08);
+    --fail-border: rgba(240,84,84,0.25);
+    --accent: #4f8ef7;
+    --accent-bg: rgba(79,142,247,0.1);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  .masthead {
+    border-bottom: 0.5px solid var(--border2);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .masthead-left {}
+
+  .sys-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 0.5px solid rgba(79,142,247,0.25);
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin-bottom: 10px;
+  }
+
+  .sys-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%,100%{opacity:1} 50%{opacity:.4}
+  }
+
+  .masthead h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--text);
+  }
+
+  .masthead p {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 3px;
+  }
+
+  .meta-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 3px;
+    border: 0.5px solid var(--border2);
+    color: var(--text2);
+    background: var(--surface2);
+    letter-spacing: .04em;
+  }
+
+  /* INPUT PANEL */
+  .panel {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .panel-body {
+    padding: 14px;
+  }
+
+  .prompt-line {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .prompt-line::before {
+    content: '»';
+    font-family: var(--mono);
+    color: var(--accent);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 0.5px solid var(--border2);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.7;
+    transition: border-color .2s;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .input-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .word-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 9px 20px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: .01em;
+    transition: opacity .15s, transform .1s;
+  }
+
+  .run-btn:hover { opacity: .88; }
+  .run-btn:active { transform: scale(.98); }
+
+  .run-btn .icon {
+    width: 14px; height: 14px;
+    fill: #fff;
+  }
+
+  /* DASHBOARD */
+  #dashboard { display: none; }
+  #dashboard.show { display: block; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  /* SIEVE GRID */
+  .sieve-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  @media(max-width:560px){ .sieve-grid { grid-template-columns: 1fr; } }
+
+  .rung {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    position: relative;
+    transition: border-color .3s;
+    animation: fadeUp .3s ease both;
+  }
+
+  .rung.pass { border-color: var(--pass-border); }
+  .rung.fail { border-color: var(--fail-border); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(6px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .rung:nth-child(1){animation-delay:.05s}
+  .rung:nth-child(2){animation-delay:.1s}
+  .rung:nth-child(3){animation-delay:.15s}
+  .rung:nth-child(4){animation-delay:.2s}
+
+  .rung-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .rung-id {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .status-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .status-badge.pass {
+    background: var(--pass-bg);
+    color: var(--pass);
+    border: 0.5px solid var(--pass-border);
+  }
+
+  .status-badge.fail {
+    background: var(--fail-bg);
+    color: var(--fail);
+    border: 0.5px solid var(--fail-border);
+  }
+
+  .status-badge.pending {
+    background: var(--surface3);
+    color: var(--text3);
+    border: 0.5px solid var(--border);
+  }
+
+  .rung-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 3px;
+  }
+
+  .rung-threshold {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .drop-indicator {
+    display: none;
+    margin-top: 10px;
+    padding: 7px 10px;
+    background: var(--fail-bg);
+    border: 0.5px solid var(--fail-border);
+    border-radius: 5px;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .drop-indicator.show { display: flex; }
+
+  .drop-arrow-icon {
+    color: var(--fail);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+
+  .drop-text {
+    font-size: 11px;
+    color: var(--fail);
+    line-height: 1.5;
+  }
+
+  .drop-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 1px;
+  }
+
+  /* AUDIT TABLE */
+  .audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 12px;
+  }
+
+  .audit-table thead tr {
+    border-bottom: 0.5px solid var(--border2);
+  }
+
+  .audit-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 500;
+    background: var(--surface2);
+  }
+
+  .audit-table th:first-child { border-radius: 6px 0 0 0; }
+  .audit-table th:last-child { border-radius: 0 6px 0 0; }
+
+  .audit-table tbody tr {
+    border-bottom: 0.5px solid var(--border);
+    animation: fadeUp .3s ease both;
+  }
+
+  .audit-table tbody tr:last-child { border-bottom: none; }
+  .audit-table tbody tr:nth-child(1){animation-delay:.1s}
+  .audit-table tbody tr:nth-child(2){animation-delay:.15s}
+  .audit-table tbody tr:nth-child(3){animation-delay:.2s}
+  .audit-table tbody tr:nth-child(4){animation-delay:.25s}
+
+  .audit-table td {
+    padding: 10px 12px;
+    vertical-align: top;
+    background: var(--surface);
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .audit-table td:first-child {
+    border-left: 2px solid var(--border);
+  }
+
+  .audit-table tr.apass td:first-child { border-left-color: var(--pass); }
+  .audit-table tr.afail td:first-child { border-left-color: var(--fail); }
+
+  .cell-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .cell-name {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .result-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .result-tag.pass { background: var(--pass-bg); color: var(--pass); }
+  .result-tag.fail { background: var(--fail-bg); color: var(--fail); }
+
+  .evidence-cell { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  .token {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin: 2px 2px 0 0;
+  }
+
+  .tok-pass { background: var(--pass-bg); color: var(--pass); border: 0.5px solid var(--pass-border); }
+  .tok-fail { background: var(--fail-bg); color: var(--fail); border: 0.5px solid var(--fail-border); }
+  .tok-neutral { background: var(--surface3); color: var(--text2); border: 0.5px solid var(--border2); }
+
+  .fallback-note {
+    margin-top: 6px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--fail);
+    opacity: .8;
+  }
+
+  /* VERDICT */
+  .verdict {
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: none;
+    animation: fadeUp .3s ease both;
+    animation-delay: .3s;
+  }
+
+  .verdict.show { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
+  .verdict.band-c { background: var(--pass-bg); border: 0.5px solid var(--pass-border); }
+  .verdict.band-b { background: var(--fail-bg); border: 0.5px solid var(--fail-border); }
+
+  .verdict-left { flex-shrink: 0; }
+
+  .verdict-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .band-c .verdict-label { color: var(--pass); }
+  .band-b .verdict-label { color: var(--fail); }
+
+  .band-display {
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.03em;
+  }
+
+  .band-c .band-display { color: var(--pass); }
+  .band-b .band-display { color: var(--fail); }
+
+  .verdict-right { flex: 1; min-width: 200px; }
+
+  .verdict-heading {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .band-c .verdict-heading { color: var(--pass); }
+  .band-b .verdict-heading { color: var(--fail); }
+
+  .verdict-body {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .band-c .verdict-body { color: rgba(34,201,122,.8); }
+  .band-b .verdict-body { color: rgba(240,84,84,.8); }
+
+  .fail-criterion-list {
+    margin-top: 8px;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .fail-criterion-list li {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(240,84,84,.12);
+    border: 0.5px solid rgba(240,84,84,.3);
+    border-radius: 3px;
+    color: var(--fail);
+  }
+
+  /* score bar */
+  .score-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .score-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 3px;
+    border-radius: 2px;
+    transition: width .6s ease;
+  }
+
+  .score-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  /* RESET BTN */
+  .reset-bar {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+    justify-content: flex-end;
+  }
+
+  .reset-bar.show { display: flex; }
+
+  .reset-btn {
+    background: none;
+    border: 0.5px solid var(--border2);
+    border-radius: 5px;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+
+  .reset-btn:hover { border-color: var(--text2); color: var(--text); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  @media(max-width:620px) {
+    .audit-table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="sys-tag">EAL Assessment · Strand 3 Diagnostic</div>
+      <h1>Sieve-Logic Validation Engine</h1>
+      <p>DfE Band C threshold screening — automated competency classification</p>
+    </div>
+    <div class="meta-pills">
+      <span class="pill">GRAMMAR</span>
+      <span class="pill">STRAND 3</span>
+      <span class="pill">v1.0</span>
+    </div>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Student Input</span>
+      <span class="panel-badge">Prompt: "Write about what you did yesterday."</span>
+    </div>
+    <div class="panel-body">
+      <div class="prompt-line">Enter student's written response in full. Punctuation and capitalisation are preserved.</div>
+      <textarea id="student-input" placeholder="Type or paste the student's response here…">Yesterday I go to the park with my friend. We played football and I scored two goals because I am very good player. Then we walked home but it was raining so we run quickly. My mum cooked dinner when I arrived.</textarea>
+      <div class="input-actions">
+        <span class="word-count" id="word-count">0 words</span>
+        <button class="run-btn" onclick="runDiagnostic()">
+          <svg class="icon" viewBox="0 0 16 16"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+          Run Diagnostic
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+
+    <div class="section-label">Sieve analysis — Band C threshold checks</div>
+    <div class="sieve-grid" id="sieve-grid"></div>
+
+    <div class="section-label">Teacher audit report</div>
+    <table class="audit-table" id="audit-table">
+      <thead>
+        <tr>
+          <th style="width:140px">Criterion</th>
+          <th style="width:80px">Result</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody id="audit-body"></tbody>
+    </table>
+
+    <div class="section-label">Final placement</div>
+    <div class="verdict" id="verdict"></div>
+
+    <div class="reset-bar show" id="reset-bar">
+      <button class="reset-btn" onclick="resetTool()">&#8635; Run another assessment</button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span class="footer-note">EAL Sieve-Logic Engine · Strand 3: Grammar · Jim-Approved Thresholds</span>
+    <span class="footer-note">For internal assessment use only</span>
+  </div>
+
+</div>
+
+<script>
+const THRESHOLDS = [
+  {
+    id: 'C3.1',
+    name: 'Subordinate clause structure',
+    threshold: '≥ 1 subordinate clause present',
+    fallback: { id:'B3.1', note:'Simple sentences accepted without subordination' },
+    test(txt) {
+      const re = /\b(because|although|when|while|after|before|if|since|unless|until|as|though|even though|so that|whenever|wherever)\b/gi;
+      const matches = txt.match(re) || [];
+      const unique = [...new Set(matches.map(m => m.toLowerCase()))];
+      return { pass: unique.length >= 1, found: unique, count: unique.length };
+    },
+    evidence(r) {
+      if (r.found.length) {
+        return 'Subordinators detected: ' + r.found.map(w => `<span class="token tok-pass">${w}</span>`).join('') +
+          `. Count: ${r.count}.`;
+      }
+      return 'No subordinate clause markers detected. Student appears to be producing simple sentences only.';
+    }
+  },
+  {
+    id: 'C3.2',
+    name: 'Extended conjunction use',
+    threshold: '≥ 2 unique conjunctions beyond "and"',
+    fallback: { id:'B3.2', note:'1 conjunction accepted even if misused' },
+    test(txt) {
+      const re = /\b(but|because|so|if|then|although|when|while|after|before|since|unless|until|as|though|or|yet|nor|however|therefore|moreover|furthermore|whereas|whenever|unless|although)\b/gi;
+      const matches = txt.match(re) || [];
+      const unique = [...new Set(matches.map(m => m.toLowerCase()))];
+      return { pass: unique.length >= 2, found: unique, count: unique.length };
+    },
+    evidence(r) {
+      if (r.found.length) {
+        return 'Conjunctions found: ' + r.found.map(w => `<span class="token ${r.count >= 2 ? 'tok-pass' : 'tok-neutral'}">${w}</span>`).join('') +
+          `. Unique count: ${r.count}. Threshold: 2.`;
+      }
+      return 'No qualifying conjunctions found beyond "and".';
+    }
+  },
+  {
+    id: 'C3.4',
+    name: 'Past simple accuracy',
+    threshold: '≥ 50% accuracy across all past-tense attempts',
+    fallback: { id:'B3.4', note:'Some past-tense forms present; accuracy not assessed at this band' },
+    test(txt) {
+      const correct = ['played','walked','cooked','arrived','scored','was','were','had','came','said','took','made','saw','got','gave','found','kept','put','sat','left','felt','brought','bought','thought','told','became','began','fell','held','sent','paid','heard','grew','knew','wanted','needed','looked','asked','worked','lived','started','happened','decided','tried','called','seemed','turned','showed','moved','changed'];
+      const errors = { go:true, run:true, come:true, see:true, take:true, make:true, get:true, give:true, eat:true, drink:true };
+      const words = txt.toLowerCase().match(/\b\w+\b/g) || [];
+      let good = [], bad = [];
+      const edWords = txt.match(/\b\w+(ed)\b/gi) || [];
+      edWords.forEach(w => { const lw = w.toLowerCase(); if (!good.includes(lw)) good.push(lw); });
+      words.forEach(w => {
+        if (correct.includes(w) && !good.includes(w)) good.push(w);
+        if (errors[w] && !bad.includes(w)) bad.push(w);
+      });
+      const total = good.length + bad.length;
+      const acc = total > 0 ? Math.round(good.length / total * 100) : 100;
+      return { pass: acc >= 50, correct: good, wrong: bad, acc, total };
+    },
+    evidence(r) {
+      let out = `Accuracy: <strong style="color:${r.pass ? 'var(--pass)' : 'var(--fail)'}">${r.acc}%</strong> across ${r.total} attempt(s). `;
+      if (r.correct.length) out += 'Correct: ' + r.correct.map(w => `<span class="token tok-pass">${w} ✓</span>`).join('');
+      if (r.wrong.length) out += ' &nbsp;Errors: ' + r.wrong.map(w => `<span class="token tok-fail">${w} ✗</span>`).join('');
+      if (r.total === 0) out = 'No past-tense attempts detected in the text.';
+      return out;
+    }
+  },
+  {
+    id: 'C3.6',
+    name: 'Cohesion & logical sequencing',
+    threshold: '≥ 1 sequencing marker or linked clause pair',
+    fallback: { id:'B3.6', note:'Basic sequencing words only (e.g. first, then) sufficient at Band B' },
+    test(txt) {
+      const seq = /\b(then|after|before|next|finally|first|second|later|when|while|meanwhile|afterwards|subsequently|following this)\b/gi;
+      const link = /\b(because|so|although|but|however|therefore|moreover|whereas)\b/gi;
+      const sm = txt.match(seq) || [];
+      const lm = txt.match(link) || [];
+      const all = [...new Set([...sm, ...lm].map(m => m.toLowerCase()))];
+      return { pass: all.length >= 1, markers: all, seqCount: sm.length, linkCount: lm.length };
+    },
+    evidence(r) {
+      if (r.markers.length) {
+        return 'Cohesive markers found: ' + r.markers.map(w => `<span class="token tok-neutral">${w}</span>`).join('') +
+          `. Sequencing: ${r.seqCount} | Linking: ${r.linkCount}.`;
+      }
+      return 'No sequencing or linking markers detected. Text may lack discourse-level cohesion.';
+    }
+  }
+];
+
+// Word count
+const ta = document.getElementById('student-input');
+const wc = document.getElementById('word-count');
+function updateWC() {
+  const w = ta.value.trim().split(/\s+/).filter(Boolean).length;
+  wc.textContent = w + ' word' + (w !== 1 ? 's' : '');
+}
+ta.addEventListener('input', updateWC);
+updateWC();
+
+function runDiagnostic() {
+  const txt = ta.value.trim();
+  if (!txt) { alert('Please enter a student response before running the diagnostic.'); return; }
+
+  const results = THRESHOLDS.map(t => {
+    const r = t.test(txt);
+    return { ...t, result: r };
+  });
+
+  renderSieve(results);
+  renderAudit(results);
+  renderVerdict(results);
+
+  const dash = document.getElementById('dashboard');
+  dash.classList.add('show');
+  document.getElementById('reset-bar').classList.add('show');
+  setTimeout(() => dash.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+function renderSieve(results) {
+  const grid = document.getElementById('sieve-grid');
+  grid.innerHTML = results.map((r, i) => {
+    const pass = r.result.pass;
+    const cls = pass ? 'pass' : 'fail';
+    const badge = `<span class="status-badge ${cls}">${pass ? 'PASS' : 'FAIL'}</span>`;
+    const drop = !pass ? `
+      <div class="drop-indicator show">
+        <span class="drop-arrow-icon">↓</span>
+        <div class="drop-text">
+          <strong>Falls to ${r.fallback.id}</strong>
+          ${r.fallback.note}
+        </div>
+      </div>` : '';
+    return `<div class="rung ${cls}" style="animation-delay:${0.05 + i * 0.05}s">
+      <div class="rung-header">
+        <span class="rung-id">${r.id}</span>
+        ${badge}
+      </div>
+      <div class="rung-name">${r.name}</div>
+      <div class="rung-threshold">${r.threshold}</div>
+      ${drop}
+    </div>`;
+  }).join('');
+}
+
+function renderAudit(results) {
+  const tbody = document.getElementById('audit-body');
+  tbody.innerHTML = results.map((r, i) => {
+    const pass = r.result.pass;
+    const cls = pass ? 'apass' : 'afail';
+    const tag = `<span class="result-tag ${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>`;
+    const ev = r.evidence(r.result);
+    const fn = !pass ? `<div class="fallback-note">→ ${r.fallback.id}: ${r.fallback.note}</div>` : '';
+    return `<tr class="${cls}" style="animation-delay:${0.1 + i * 0.05}s">
+      <td><span class="cell-id">${r.id}</span><span class="cell-name">${r.name}</span></td>
+      <td>${tag}</td>
+      <td class="evidence-cell">${ev}${fn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderVerdict(results) {
+  const fails = results.filter(r => !r.result.pass);
+  const vbox = document.getElementById('verdict');
+  const passCount = results.length - fails.length;
+
+  const barWidth = Math.round(passCount / results.length * 100);
+  const barColor = fails.length === 0 ? 'var(--pass)' : 'var(--fail)';
+
+  if (fails.length === 0) {
+    vbox.className = 'verdict show band-c';
+    vbox.innerHTML = `
+      <div class="verdict-left">
+        <div class="verdict-label">Final Placement</div>
+        <div class="band-display">Band C</div>
+      </div>
+      <div class="verdict-right">
+        <div class="verdict-heading">All Strand 3 thresholds satisfied</div>
+        <div class="verdict-body">Student meets all Band C criteria for Strand 3: Grammar. All ${results.length} threshold checks passed. Refer to Strands 1, 2, and 4 for full-band confirmation before issuing a final classification.</div>
+        <div class="score-bar-wrap">
+          <div class="score-track"><div class="score-fill" style="width:${barWidth}%;background:${barColor}"></div></div>
+          <span class="score-label">${passCount}/${results.length} thresholds passed</span>
+        </div>
+      </div>`;
+  } else {
+    const failItems = fails.map(f => `<li>${f.id}</li>`).join('');
+    vbox.className = 'verdict show band-b';
+    vbox.innerHTML = `
+      <div class="verdict-left">
+        <div class="verdict-label">Final Placement</div>
+        <div class="band-display">Band B</div>
+      </div>
+      <div class="verdict-right">
+        <div class="verdict-heading">${fails.length} threshold${fails.length > 1 ? 's' : ''} failed — sieved from Band C</div>
+        <div class="verdict-body">Student did not meet Band C requirements on the criterion/criteria below. Assessment has been sieved to Band B. Consult the audit log above for full evidence and band-equivalent descriptors.</div>
+        <ul class="fail-criterion-list">${failItems}</ul>
+        <div class="score-bar-wrap">
+          <div class="score-track"><div class="score-fill" style="width:${barWidth}%;background:${barColor}"></div></div>
+          <span class="score-label">${passCount}/${results.length} thresholds passed</span>
+        </div>
+      </div>`;
+  }
+  vbox.style.display = 'flex';
+}
+
+function resetTool() {
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('verdict').className = 'verdict';
+  document.getElementById('verdict').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
